@@ -84,7 +84,7 @@ print(&#x27;Precipitación media acumulada (mm):&#x27;, resultado.getInfo())</co
 <div class="view" id="v-post" hidden><div class="form" id="f-post"></div></div>
 </main><footer>Material de aprendizaje basado en documentación oficial y capturas suministradas. Este documento no acredita una certificación institucional ni implica aprobación automática del acceso sin costo.</footer></div><script>(()=>{
 const $=i=>document.getElementById(i);
-const CONFIG={url:''};
+const CONFIG={url:'https://bjtbnzfdswydvwkrpscd.supabase.co',key:'sb_publishable_3MPkDwmLuZaZerr9Vh_84A_EdxbTaTo',tabla:'respuestas'};
 const PROG=['Ingeniería de analítica de datos','Ingeniería de sistemas','Ingeniería civil (grupo piloto)','Maestría en cambio climático','Doctorado en educación','Otro'];
 const NOM={codigo:'el código personal (4 a 20 letras o números, sin espacios ni tildes)',programa:'el programa',consent:'la autorización de uso de respuestas'};
 const ESC='Marque de 1 a 5 (1 totalmente en desacuerdo, 3 ni de acuerdo ni en desacuerdo, 5 totalmente de acuerdo). ';
@@ -138,8 +138,9 @@ if(p.id){if(!/^[A-Za-z0-9]{4,20}$/.test(d.codigo||''))m.push('codigo');if(!d.pro
 async function enviar(f){const d=S[f].d,r={};Object.keys(d).forEach(k=>{if(/^p\d+$/.test(k))r[k]=d[k]});
 const fila={cuestionario:f=='pre'?'previo':'posterior',codigo:d.codigo.toLowerCase(),programa:d.programa,consentimiento:true,respuestas:r};
 if(!CONFIG.url){const a=JSON.parse(localStorage.getItem('tg_envios')||'[]');a.push({...fila,creado_en:new Date().toISOString()});localStorage.setItem('tg_envios',JSON.stringify(a));return 'local'}
-const x=await fetch(CONFIG.url,{method:'POST',body:JSON.stringify(fila)}).then(r=>r.json()).catch(()=>({ok:false}));
-if(x.error=='duplicado')throw new Error('Este código ya envió este cuestionario. Si fue un error, avise al facilitador.');
+const hd={apikey:CONFIG.key,'Content-Type':'application/json',Prefer:'return=minimal'};if(CONFIG.key.startsWith('eyJ'))hd.Authorization='Bearer '+CONFIG.key;
+const x=await fetch(`${CONFIG.url}/rest/v1/${CONFIG.tabla}`,{method:'POST',headers:hd,body:JSON.stringify(fila)}).catch(()=>({ok:false}));
+if(x.status==409)throw new Error('Este código ya envió este cuestionario. Si fue un error, avise al facilitador.');
 if(!x.ok)throw new Error('No se pudo enviar. Revise su conexión e intente de nuevo; sus respuestas siguen guardadas en este equipo.');
 return 'nube'}
 function csv(){const a=JSON.parse(localStorage.getItem('tg_envios')||'[]'),ks=['cuestionario','codigo','programa','creado_en',...Array.from({length:10},(_,i)=>'p'+(i+1))];
